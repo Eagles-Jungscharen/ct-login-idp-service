@@ -1,0 +1,35 @@
+{
+  "name": "ct-login-idp-service",
+  "version": "1.0.0",
+  "description": "ChurchTools Identity Provider Service - Login UI + Azure Functions Backend",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "sync:env": "node scripts/sync-env.mjs",
+    "dev:frontend": "npm run sync:env && npm run dev --workspace=@ct-login-idp-service/frontend",
+    "dev:backend": "npm run sync:env && cd packages/backend && dotnet run",
+    "build:shared": "npm run build --workspace=@ct-login-idp-service/shared",
+    "build:frontend": "npm run build --workspace=@ct-login-idp-service/frontend",
+    "build:backend": "cd packages/backend && dotnet build",
+    "build:all": "npm run build:shared && npm run build:frontend && npm run build:backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && cd packages/backend && dotnet clean"
+  },
+  "keywords": [
+    "churchtool",
+    "idp",
+    "login",
+    "azure",
+    "functions",
+    "react",
+    "oidc"
+  ],
+  "author": "EaglesJungscharen",
+  "license": "Apache-2.0"
+}

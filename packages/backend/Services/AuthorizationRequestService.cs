@@ -1,0 +1,41 @@
+using EaglesJungscharen.CT.IDP.Models.Store;
+using GuedesPlace.AzureTools.Tables;
+
+namespace EaglesJungscharen.CT.IDP.Services;
+
+public interface IAuthorizationRequestService
+{
+    Task<AuthorizationRequest> StoreAuthorizationRequestAsync(string codeChallenge, string codeChallengeMethod, string callbackUrl, string state, string? nonce = null, string? clientId = null, string? scope = null);
+    Task<AuthorizationRequest?> GetAuthorizationRequestByIdAsync(string id);
+}
+
+public class AuthorizationRequestService(ExtendedAzureTableClientService tableClientService) : IAuthorizationRequestService
+{
+    private readonly TypedAzureTableClient<AuthorizationRequest> _tableClient =
+        tableClientService.GetTypedTableClient<AuthorizationRequest>();
+
+    public async Task<AuthorizationRequest> StoreAuthorizationRequestAsync(string codeChallenge, string codeChallengeMethod, string callbackUrl, string state, string? nonce = null, string? clientId = null, string? scope = null)
+    {
+        var authorizationRequest = new AuthorizationRequest
+        {
+            Id = Guid.NewGuid().ToString(),
+            CodeChallenge = codeChallenge,
+            CodeChallengeMethod = codeChallengeMethod,
+            CallbackUrl = callbackUrl,
+            State = state,
+            Nonce = nonce,
+            ClientId = clientId,
+            Scope = scope,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _tableClient.InsertOrReplaceAsync(authorizationRequest.Id, "AUTH_REQUEST", authorizationRequest);
+        return authorizationRequest;
+    }
+
+    public async Task<AuthorizationRequest?> GetAuthorizationRequestByIdAsync(string id)
+    {
+        var result = await _tableClient.GetByIdAsync(id, "AUTH_REQUEST");
+        return result?.Entity;
+    }
+}
