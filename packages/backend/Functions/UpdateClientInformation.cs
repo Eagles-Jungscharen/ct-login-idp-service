@@ -5,6 +5,8 @@ using EaglesJungscharen.CT.IDP.Models;
 using EaglesJungscharen.CT.IDP.Services;
 using Microsoft.Azure.Functions.Worker;
 
+using EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
+
 namespace EaglesJungscharen.CT.IDP.Functions;
 
 public class UpdateClientInformation(IClientInformationService clientInformationService, ILogger<UpdateClientInformation> logger)

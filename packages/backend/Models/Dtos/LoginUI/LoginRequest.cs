@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace EaglesJungscharen.CT.IDP.Models;
+namespace EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
 
 public class LoginRequest
 {

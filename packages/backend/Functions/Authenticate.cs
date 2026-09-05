@@ -5,7 +5,7 @@ using EaglesJungscharen.CT.IDP.Models.ChurchTools;
 using EaglesJungscharen.CT.IDP.Models;
 using EaglesJungscharen.CT.IDP.Services;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Net.Http.Headers;
+using EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
 
 namespace EaglesJungscharen.CT.IDP.Functions;
 
@@ -43,10 +43,10 @@ public class Authenticate(ICTLoginService loginService, IJWTService jwtService, 
             });
         }
 
-        LoginResult loginResult = await _loginService.DoLogin(username, password);
-        if (!loginResult.Error)
+        var loginServiceResult = await _loginService.DoLogin(username, password);
+        if (!loginServiceResult.Error)
         {
-            var ctResponse = loginResult.CTLoginResponse;
+            var ctResponse = loginServiceResult.CTLoginResponse;
             var ctWhoami = await _loginService.GetWhoAmi(ctResponse!.Token!, ctResponse.PersonId!);
             if (ctWhoami == null)
             {
@@ -67,7 +67,7 @@ public class Authenticate(ICTLoginService loginService, IJWTService jwtService, 
             Tokens tokens = await _jwtService.BuildJWTToken(ctWhoami, scopes, extRef, issuer, "ct-auth");
             return new OkObjectResult(tokens);
         }
-        _logger.LogInformation("Result: {Error}", loginResult.Error);
+        _logger.LogInformation("Result: {Error}", loginServiceResult.Error);
         return new UnauthorizedResult();
     }
 }

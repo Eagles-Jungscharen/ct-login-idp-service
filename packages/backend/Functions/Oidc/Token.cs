@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
 
 namespace EaglesJungscharen.CT.IDP.Functions.Oidc;
 

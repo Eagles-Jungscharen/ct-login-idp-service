@@ -1,14 +1,14 @@
 using EaglesJungscharen.CT.IDP.Models.ChurchTools;
-using EaglesJungscharen.CT.IDP.Models;
-using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
+using EaglesJungscharen.CT.IDP.Models;
 
 namespace EaglesJungscharen.CT.IDP.Services;
 
 public interface ICTLoginService
 {
-    Task<LoginResult> DoLogin(string userName, string password);
+    Task<LoginServiceResult> DoLogin(string userName, string password);
     Task<CTWhoami?> GetWhoAmi(string loginToken, int id);
     Task<List<CTGroupContainer>> GetGroups(string loginToken, int id);
 }
@@ -19,7 +19,7 @@ public class CTLoginService(HttpClient httpClient, ILogger<CTLoginService> logge
     private readonly ILogger<CTLoginService> _logger = logger;
     private readonly string _cturl = Environment.GetEnvironmentVariable("CT_URL") ?? throw new InvalidOperationException("CT_URL not configured");
 
-    public async Task<LoginResult> DoLogin(string userName, string password)
+    public async Task<LoginServiceResult> DoLogin(string userName, string password)
     {
         var payload = new { username = userName, password = password };
         var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
@@ -29,7 +29,7 @@ public class CTLoginService(HttpClient httpClient, ILogger<CTLoginService> logge
         {
             var result = await response.Content.ReadFromJsonAsync<CTResponse<CTLoginTokenResponse>>();
             CTLoginTokenResponse? cTLoginResponse = result?.Data;
-            return new LoginResult()
+            return new LoginServiceResult()
             {
                 Error = false,
                 CTLoginResponse = cTLoginResponse,
@@ -41,11 +41,11 @@ public class CTLoginService(HttpClient httpClient, ILogger<CTLoginService> logge
         }
     }
 
-    private async Task<LoginResult> BuildErrorResponse(HttpResponseMessage response)
+    private async Task<LoginServiceResult> BuildErrorResponse(HttpResponseMessage response)
     {
         var errorPayload = await response.Content.ReadFromJsonAsync<CTErrorPayload>();
         _logger.LogError("Login failed with status code {StatusCode} and message {Message}", response.StatusCode, errorPayload?.Message);
-        LoginResult lr = new()
+        LoginServiceResult lr = new()
         {
             Error = true,
             ErrorMessage = errorPayload?.TranslatedMessage ?? response.StatusCode.ToString()

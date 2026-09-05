@@ -4,6 +4,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using EaglesJungscharen.CT.IDP.Models;
 using EaglesJungscharen.CT.IDP.Services;
+using EaglesJungscharen.CT.IDP.Models.Dtos.LoginUI;
 
 namespace EaglesJungscharen.CT.IDP.Functions;
 
@@ -72,10 +73,10 @@ public class Login(ICTLoginService loginService, ILogger<Login> logger, UserToke
             });
         }
 
-        LoginResult loginResult = await _loginService.DoLogin(username, password);
-        if (!loginResult.Error)
+        var loginServiceResult = await _loginService.DoLogin(username, password);
+        if (!loginServiceResult.Error)
         {
-            var ctResponse = loginResult.CTLoginResponse;
+            var ctResponse = loginServiceResult.CTLoginResponse;
             var ctWhoami = await _loginService.GetWhoAmi(ctResponse!.Token!, ctResponse.PersonId!);
             if (ctWhoami == null)
             {
@@ -99,10 +100,14 @@ public class Login(ICTLoginService loginService, ILogger<Login> logger, UserToke
             var stRef = await _userTokenService.StoreToken("--", ctResponse!.Token!);
 
             var authorizationCode = await _authorizationCodeService.StoreAuthorizationCodeAsync(ctWhoami, requestedOidcScopes, stRef, authorizationRequest);
-            return new OkObjectResult(new {callback=$"{authorizationRequest.CallbackUrl}?code={Uri.EscapeDataString(authorizationCode.Id)}&state={Uri.EscapeDataString(authorizationRequest.State)}"});
+            var loginResult = new LoginResult
+            {
+                Callback = $"{authorizationRequest.CallbackUrl}?code={Uri.EscapeDataString(authorizationCode.Id)}&state={Uri.EscapeDataString(authorizationRequest.State)}"
+            };
+            return new OkObjectResult(loginResult);
         }
 
-        _logger.LogInformation("OIDC login failed: {Error}", loginResult.Error);
+        _logger.LogInformation("OIDC login failed: {Error}", loginServiceResult.Error);
         return new UnauthorizedResult();
     }
 }
