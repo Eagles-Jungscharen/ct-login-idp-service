@@ -8,6 +8,6 @@ public class LoginRequest
     public string? Username { get; set; }
     [JsonPropertyName("password")]
     public string? Password { get; set; }
-    [JsonPropertyName("authentication_request_id")]
+    [JsonPropertyName("authenticationRequestId")]
     public string? AuthenticationRequestId { get; set; }
 }

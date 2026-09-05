@@ -1,5 +1,5 @@
 import { appConfig } from '../config/appConfig';
-import type { LoginRequest, LoginResult, ErrorResponse } from '../types/auth';
+import type { LoginRequest, LoginResult, ErrorRecord, LoginActionResult } from '../types/auth';
 
 /**
  * Führt einen Login-Request zum Server durch
@@ -9,17 +9,13 @@ import type { LoginRequest, LoginResult, ErrorResponse } from '../types/auth';
  * @param authenticationRequestId - Authorization Request ID aus der URL
  * @returns LoginResult mit success/error
  */
-export async function login(
-  username: string,
-  password: string,
-  authenticationRequestId: string
-): Promise<LoginResult> {
+export const login = async (username: string, password: string, authenticationRequestId: string): Promise<LoginActionResult> => {
   const loginUrl = `${appConfig.loginServerUrl}/api/login`;
 
   const payload: LoginRequest = {
     username,
     password,
-    authentication_request_id: authenticationRequestId,
+    authenticationRequestId,
   };
 
   try {
@@ -32,7 +28,7 @@ export async function login(
       redirect: 'follow',
     });
     if (response.ok) {
-      const data = await response.json() as { callback?: string };
+      const data = await response.json() as LoginResult;
       if (data.callback) {
         window.location.href = data.callback;
       }
@@ -41,10 +37,10 @@ export async function login(
 
     // Fehlerfall: Versuche die Fehlermeldung aus dem Response-Body zu lesen
     let errorMessage = `Login fehlgeschlagen (Status: ${response.status})`;
-    
+
     try {
-      const errorData: ErrorResponse = await response.json();
-      errorMessage = errorData.error || errorData.message || errorMessage;
+      const errorData: ErrorRecord = await response.json();
+      errorMessage = errorData.error || errorMessage;
     } catch {
       // Wenn JSON-Parsing fehlschlägt, verwende die Standard-Fehlermeldung
       errorMessage = `Login fehlgeschlagen (Status: ${response.status})`;

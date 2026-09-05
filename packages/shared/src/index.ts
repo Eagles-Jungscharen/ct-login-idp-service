@@ -1,1 +1,1 @@
-export type { LoginRequest, ErrorResponse, LoginResult } from './types/auth.js';
+export type { LoginRequest, ErrorRecord, LoginResult } from './generated/dtos.ts';
